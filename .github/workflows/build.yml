@@ -26,23 +26,30 @@ jobs:
         with:
           clang-format-version: "20"
 
-  build-windows:
-    name: Build Windows
-    runs-on: windows-latest
+  build:
+    name: Build
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
+        platform:
+          - Windows
+          - Linux
+          - macOS
         configuration:
           - Debug
           - Release
-        architecture:
-          #- x86
-          - x64
         include:
           - configuration: Debug
             preset: debug
           - configuration: Release
             preset: release
+          - platform: Windows
+            runner: windows-latest
+          - platform: Linux
+            runner: ubuntu-latest
+          - platform: macOS
+            runner: macos-latest
     steps:
       - name: Checkout Source
         uses: actions/checkout@v5
@@ -52,8 +59,9 @@ jobs:
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
+        if: ${{ startsWith(matrix.platform, 'Windows') }}
         with:
-          arch: ${{ matrix.architecture }}
+          arch: "x64"
 
       - name: CMake Build
         run: cmake --workflow --preset=${{matrix.preset}}
@@ -62,15 +70,14 @@ jobs:
         uses: actions/upload-artifact@v4
         if: "${{ matrix.configuration == 'Release' }}"
         with:
-          name: Windows ${{ matrix.architecture }} ${{matrix.configuration}} Binaries
+          name: ${{ matrix.platform }} ${{matrix.configuration}} Binaries
           path: |
-            deps/ida-sdk/src/bin/plugins/function-string-associate.dll
-            deps/ida-sdk/src/bin/plugins/function-string-associate.pdb
+            deps/ida-sdk/src/bin/plugins/*
 
   summary:
     name: Pipeline Summary
     runs-on: ubuntu-24.04
-    needs: [build-windows, verify-formatting]
+    needs: [build, verify-formatting]
     if: always()
     steps:
       - uses: geekyeggo/delete-artifact@v5
