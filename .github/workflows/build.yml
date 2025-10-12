@@ -63,8 +63,8 @@ jobs:
         with:
           name: Windows ${{ matrix.architecture }} ${{matrix.configuration}} Binaries
           path: |
-            build/${{matrix.preset}}/artifacts/plugin.dll
-            build/${{matrix.preset}}/artifacts/plugin.pdb
+            deps/ida-sdk/src/bin/plugins/function-string-associate.dll
+            deps/ida-sdk/src/bin/plugins/function-string-associate.pdb
 
   summary:
     name: Pipeline Summary

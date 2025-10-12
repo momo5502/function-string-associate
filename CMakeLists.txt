@@ -11,7 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ##########################################
 
-project(ida-plugin LANGUAGES C CXX)
+project(function-string-associate LANGUAGES C CXX)
 
 ##########################################
 
