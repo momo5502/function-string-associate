@@ -7,7 +7,6 @@
 #include "plugin.hpp"
 #include "Utility.h"
 
-
 // ****************************************************************************
 // Func: GetTimeSamp()
 // Desc: Get elapsed factional seconds
@@ -15,20 +14,19 @@
 // ****************************************************************************
 TIMESTAMP getTimeStamp()
 {
-	LARGE_INTEGER tLarge;
-	QueryPerformanceCounter(&tLarge);
+    LARGE_INTEGER tLarge;
+    QueryPerformanceCounter(&tLarge);
 
-	static ALIGN(16) TIMESTAMP s_ClockFreq;
-	if(s_ClockFreq == 0.0)
-	{
-		LARGE_INTEGER tLarge;
-		QueryPerformanceFrequency(&tLarge);
-		s_ClockFreq = (TIMESTAMP) tLarge.QuadPart;
-	}
+    static ALIGN(16) TIMESTAMP s_ClockFreq;
+    if (s_ClockFreq == 0.0)
+    {
+        LARGE_INTEGER tLarge;
+        QueryPerformanceFrequency(&tLarge);
+        s_ClockFreq = (TIMESTAMP)tLarge.QuadPart;
+    }
 
-	return((TIMESTAMP) tLarge.QuadPart / s_ClockFreq);
+    return ((TIMESTAMP)tLarge.QuadPart / s_ClockFreq);
 }
-
 
 // Return a comma formatted string for a given number
 LPSTR prettyNumberString(UINT64 n, __bcount(32) LPSTR buffer)
@@ -46,25 +44,22 @@ LPSTR prettyNumberString(UINT64 n, __bcount(32) LPSTR buffer)
         }
     } while (n);
     strncpy(buffer, s.c_str(), 31);
-    return(buffer);
+    return (buffer);
 }
-
 
 // Get a pretty delta time string for output
 LPCSTR timeString(TIMESTAMP time)
 {
-	static char szBuff[64];
+    static char szBuff[64];
 
-	if(time >= HOUR)
-		_snprintf(szBuff, SIZESTR(szBuff), "%.2f hours", (time / (TIMESTAMP) HOUR));
-	else
-	if(time >= MINUTE)
-		_snprintf(szBuff, SIZESTR(szBuff), "%.2f minutes", (time / (TIMESTAMP) MINUTE));
-	else
-	if(time < (TIMESTAMP) 0.01)
-		_snprintf(szBuff, SIZESTR(szBuff), "%.2f milliseconds", (time * (TIMESTAMP) 1000.0));
-	else
-		_snprintf(szBuff, SIZESTR(szBuff), "%.2f seconds", time);
+    if (time >= HOUR)
+        _snprintf(szBuff, SIZESTR(szBuff), "%.2f hours", (time / (TIMESTAMP)HOUR));
+    else if (time >= MINUTE)
+        _snprintf(szBuff, SIZESTR(szBuff), "%.2f minutes", (time / (TIMESTAMP)MINUTE));
+    else if (time < (TIMESTAMP)0.01)
+        _snprintf(szBuff, SIZESTR(szBuff), "%.2f milliseconds", (time * (TIMESTAMP)1000.0));
+    else
+        _snprintf(szBuff, SIZESTR(szBuff), "%.2f seconds", time);
 
-	return(szBuff);
+    return (szBuff);
 }
