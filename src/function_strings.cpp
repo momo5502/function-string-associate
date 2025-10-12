@@ -12,7 +12,14 @@ namespace momo
         constexpr size_t MAX_LINE_STR_COUNT = 10;
         constexpr size_t MAX_COMMENT = 764;
 
-        std::optional<qstring> resolve_string_at_address(ea_t address)
+        std::string trim(std::string_view str)
+        {
+            auto start = std::find_if(str.begin(), str.end(), [](unsigned char ch) { return !std::isspace(ch); });
+            auto end = std::find_if(str.rbegin(), str.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base();
+            return (start < end) ? std::string(start, end) : std::string();
+        }
+
+        std::optional<std::string> resolve_string_at_address(ea_t address)
         {
             xrefblk_t xb;
             if (!xb.first_from(address, XREF_DATA))
@@ -36,12 +43,20 @@ namespace momo
 
             get_strlit_contents(&buffer, xb.to, len, str_type);
 
-            return {std::move(buffer)};
+            std::string_view buffer_view(buffer.c_str(), buffer.size());
+            auto trimmed_str = trim(buffer_view);
+
+            if (trimmed_str.size() < MIN_STR_SIZE)
+            {
+                return std::nullopt;
+            }
+
+            return {std::move(trimmed_str)};
         }
 
-        std::set<qstring> find_strings_in_function(func_t* function)
+        std::set<std::string> find_strings_in_function(func_t* function)
         {
-            std::set<qstring> found_strings{};
+            std::set<std::string> found_strings{};
 
             func_item_iterator_t it(function);
 
@@ -72,7 +87,7 @@ namespace momo
             return !str.empty();
         }
 
-        std::string build_final_comment(const std::set<qstring>& strings)
+        std::string build_final_comment(const std::set<std::string>& strings)
         {
             std::string comment{};
 
@@ -88,7 +103,7 @@ namespace momo
                 }
 
                 comment += "\"";
-                comment += s.c_str();
+                comment += s;
                 comment += "\"";
 
                 if (comment.size() > MAX_COMMENT)
