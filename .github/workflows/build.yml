@@ -35,6 +35,9 @@ jobs:
         configuration:
           - Debug
           - Release
+        architecture:
+          #- x86
+          - x64
         include:
           - configuration: Debug
             preset: debug
@@ -49,6 +52,8 @@ jobs:
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
+        with:
+          arch: ${{ matrix.architecture }}
 
       - name: CMake Build
         run: cmake --workflow --preset=${{matrix.preset}}
@@ -56,17 +61,10 @@ jobs:
       - name: Upload Binary
         uses: actions/upload-artifact@v4
         with:
-          name: Windows ${{matrix.configuration}} Binaries
+          name: Windows ${{ matrix.architecture }} ${{matrix.configuration}} Binaries
           path: |
             build/${{matrix.preset}}/artifacts/plugin.dll
-            build/${{matrix.preset}}/artifacts/plugin.dll
-
-      - name: Upload Data Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Windows ${{matrix.configuration}} Data Artifacts
-          path: |
-            data/*
+            build/${{matrix.preset}}/artifacts/plugin.pdb
 
   summary:
     name: Pipeline Summary
