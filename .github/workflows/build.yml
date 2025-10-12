@@ -14,6 +14,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  clang-tidy:
+    name: Run Clang Tidy
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install clang-tidy
+        run: brew install llvm
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+
+      - name: CMake Build
+        run: cmake --preset=release -DMOMO_ENABLE_CLANG_TIDY=On && cmake --build --preset=release
+
   verify-formatting:
     name: Verify Formatting
     runs-on: ubuntu-24.04
@@ -78,7 +97,7 @@ jobs:
   summary:
     name: Pipeline Summary
     runs-on: ubuntu-24.04
-    needs: [build, verify-formatting]
+    needs: [build, clang-tidy, verify-formatting]
     if: always()
     steps:
       - uses: geekyeggo/delete-artifact@v5
