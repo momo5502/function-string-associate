@@ -1,0 +1,69 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+    types: [opened, synchronize, reopened]
+    
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-formatting:
+    name: Verify Formatting
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v5
+
+      - name: Verify Formatting
+        uses: jidicula/clang-format-action@v4.15.0
+        with:
+          clang-format-version: "20"
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration:
+          - Debug
+          - Release
+        include:
+          - configuration: Debug
+            preset: debug
+          - configuration: Release
+            preset: release
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: CMake Build
+        run: cmake --workflow --preset=${{matrix.preset}}
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows ${{matrix.configuration}} Binaries
+          path: |
+            build/${{matrix.preset}}/artifacts/plugin.dll
+            build/${{matrix.preset}}/artifacts/plugin.dll
+
+      - name: Upload Data Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows ${{matrix.configuration}} Data Artifacts
+          path: |
+            data/*
