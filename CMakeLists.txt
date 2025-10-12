@@ -43,3 +43,4 @@ momo_targets_disable_warnings(${EXTERNAL_TARGETS})
 
 momo_targets_expose_includes(${OWN_TARGETS})
 momo_targets_set_warnings_as_errors(${OWN_TARGETS})
+momo_targets_enable_clang_tidy(${OWN_TARGETS})
