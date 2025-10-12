@@ -2,6 +2,7 @@
 #include "ida_sdk.hpp"
 #include <pro.h>
 #include <vector>
+#include <ranges>
 #include <optional>
 
 namespace momo
@@ -14,9 +15,12 @@ namespace momo
 
         std::string trim(std::string_view str)
         {
-            auto start = std::find_if(str.begin(), str.end(), [](unsigned char ch) { return !std::isspace(ch); });
-            auto end = std::find_if(str.rbegin(), str.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base();
-            return (start < end) ? std::string(start, end) : std::string();
+            auto trimmed = str                                                                         //
+                           | std::views::drop_while([](unsigned char ch) { return std::isspace(ch); }) //
+                           | std::views::reverse                                                       //
+                           | std::views::drop_while([](unsigned char ch) { return std::isspace(ch); }) //
+                           | std::views::reverse;
+            return {trimmed.begin(), trimmed.end()};
         }
 
         std::optional<std::string> resolve_string_at_address(ea_t address)
