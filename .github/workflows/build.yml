@@ -60,6 +60,7 @@ jobs:
 
       - name: Upload Binary
         uses: actions/upload-artifact@v4
+        if: "${{ matrix.configuration == 'Release' }}"
         with:
           name: Windows ${{ matrix.architecture }} ${{matrix.configuration}} Binaries
           path: |
