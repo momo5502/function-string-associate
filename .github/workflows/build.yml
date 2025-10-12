@@ -73,6 +73,7 @@ jobs:
           name: ${{ matrix.platform }} ${{matrix.configuration}} Binaries
           path: |
             deps/ida-sdk/src/bin/plugins/*
+            !deps/ida-sdk/src/bin/plugins/readme.txt
 
   summary:
     name: Pipeline Summary
