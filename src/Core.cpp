@@ -5,23 +5,23 @@
 //
 // ****************************************************************************
 #include "stdafx.h"
-#include <WaitBoxEx.h>
+// #include <WaitBoxEx.h>
 
 const UINT MAX_LINE_STR_COUNT = 10;
-const UINT MAX_LABEL_STR = 60;  // Max size of each label
-const int  MAX_COMMENT   = 764; // Max size of whole comment line
+const UINT MAX_LABEL_STR = 60; // Max size of each label
+const int MAX_COMMENT = 764;   // Max size of whole comment line
 
 // Working label element info container
 #pragma pack(push, 1)
 struct STRC
 {
-	char str[MAX_LABEL_STR];
-	int  refs;
+    char str[MAX_LABEL_STR];
+    int refs;
 };
 #pragma pack(pop)
 
 // === Function Prototypes ===
-static void processFunction(func_t *pFunc);
+static void processFunction(func_t* pFunc);
 static void filterWhitespace(LPSTR pszString);
 
 // === Data ===
@@ -29,21 +29,18 @@ static ALIGN(16) STRC aString[MAX_LINE_STR_COUNT];
 static UINT commentCount = 0;
 
 // Main dialog
-static const char mainDialog[] =
-{
-	"BUTTON YES* Continue\n" // "Continue" instead of "okay"
-	"Function String Associate\n"
+static const char mainDialog[] = {
+    "BUTTON YES* Continue\n" // "Continue" instead of "okay"
+    "Function String Associate\n"
 
-    #ifdef _DEBUG
+#ifdef _DEBUG
     "** DEBUG BUILD **\n"
-    #endif
-	"Extracts strings from each function and intelligently adds them  \nto the function comment line.\n\n"
+#endif
+    "Extracts strings from each function and intelligently adds them  \nto the function comment line.\n\n"
     "Version %Aby Sirmabus\n"
     "<#Click to open site.#www.macromonkey.com:k:1:1::>\n\n"
 
-	" \n\n\n\n\n"
-};
-
+    " \n\n\n\n\n"};
 
 // Initialize
 void CORE_Init()
@@ -52,13 +49,12 @@ void CORE_Init()
     _ASSERT((sizeof(STRC) & 7) == 0);
 }
 
-
 // Un-initialize
 void CORE_Exit()
 {
 }
 
-static void idaapi doHyperlink(TView *fields[], int code) { open_url("http://www.macromonkey.com/bb/"); }
+// static void idaapi doHyperlink(TView *fields[], int code) { open_url("http://www.macromonkey.com/bb/"); }
 
 // Plug-in process
 void CORE_Process(int iArg)
@@ -68,40 +64,41 @@ void CORE_Process(int iArg)
         char version[16];
         sprintf(version, "%u.%u", HIBYTE(MY_VERSION), LOBYTE(MY_VERSION));
         msg("\n>> Function String Associate: v: %s, built: %s, By Sirmabus\n", version, __DATE__);
-        if (autoIsOk())
+        if (/*autoIsOk()*/ true)
         {
-            refreshUI();
-            int iUIResult = AskUsingForm_c(mainDialog, version, doHyperlink);
-            if (!iUIResult)
-            {
-                msg(" - Canceled -\n");
-                return;
-            }
-            WaitBox::show();
+            /* refreshUI();
+             int iUIResult = AskUsingForm_c(mainDialog, version, doHyperlink);
+             if (!iUIResult)
+             {
+                 msg(" - Canceled -\n");
+                 return;
+             }
+             WaitBox::show();*/
 
             // Iterate through all functions..
             TIMESTAMP startTime = getTimeStamp();
             UINT functionCount = get_func_qty();
             char buffer[32];
             msg("Processing %s functions.\n", prettyNumberString(functionCount, buffer));
-            refreshUI();
+            // refreshUI();
 
             for (UINT n = 0; n < functionCount; n++)
             {
                 processFunction(getn_func(n));
 
-                if (WaitBox::isUpdateTime())
+                /*if (WaitBox::isUpdateTime())
                 {
                     if (WaitBox::updateAndCancelCheck((int)(((float)n / (float)functionCount) * 100.0f)))
                     {
                         msg("* Aborted *\n");
                         break;
                     }
-                }
+                }*/
             }
 
-            WaitBox::hide();
-            msg("Done: Generated %s string comments in %s.\n", prettyNumberString(commentCount, buffer), timeString(getTimeStamp() - startTime));
+            // WaitBox::hide();
+            msg("Done: Generated %s string comments in %s.\n", prettyNumberString(commentCount, buffer),
+                timeString(getTimeStamp() - startTime));
             msg("---------------------------------------------------------------------\n");
             refresh_idaview_anyway();
         }
@@ -114,116 +111,111 @@ void CORE_Process(int iArg)
     CATCH()
 }
 
-
 // Remove whitespace & illegal chars from input string
 static void filterWhitespace(LPSTR pstr)
 {
-	LPSTR ps = pstr;
-	while(*ps)
-	{
-		// Replace unwanted chars with a space char
-		char c = *ps;
-		if((c < ' ') || (c > '~'))
-			*ps = ' ';
+    LPSTR ps = pstr;
+    while (*ps)
+    {
+        // Replace unwanted chars with a space char
+        char c = *ps;
+        if ((c < ' ') || (c > '~'))
+            *ps = ' ';
 
-		ps++;
-	};
+        ps++;
+    };
 
-	// Trim any starting space(s)
-	ps = pstr;
-	while(*ps)
-	{
-		if(*ps == ' ')
-	        memmove(ps, ps+1, strlen(ps));
-		else
-			break;
-	};
+    // Trim any starting space(s)
+    ps = pstr;
+    while (*ps)
+    {
+        if (*ps == ' ')
+            memmove(ps, ps + 1, strlen(ps));
+        else
+            break;
+    };
 
-	// Trim any trailing space
-	ps = (pstr + (strlen(pstr) - 1));
-	while(ps >= pstr)
-	{
-		if(*ps == ' ')
-			*ps-- = 0;
-		else
-			break;
-	};
+    // Trim any trailing space
+    ps = (pstr + (strlen(pstr) - 1));
+    while (ps >= pstr)
+    {
+        if (*ps == ' ')
+            *ps-- = 0;
+        else
+            break;
+    };
 }
 
-static int __cdecl compare(const void *a, const void *b)
+static int __cdecl compare(const void* a, const void* b)
 {
-    STRC *sa = (STRC *)a;
-    STRC *sb = (STRC *)b;
+    STRC* sa = (STRC*)a;
+    STRC* sb = (STRC*)b;
     return (sa->refs - sb->refs);
 }
 
 // Process function
-static void processFunction(func_t *f)
+static void processFunction(func_t* f)
 {
     const int MIN_STR_SIZE = 4;
 
-	// Skip tiny functions for speed
-	if(f->size() >= 8)
-	{
-		// Skip if it already has type comment
-		// TODO: Could have option to just skip comment if one already exists?
-		BOOL skip = FALSE;
-		LPSTR tempComment = get_func_cmt(f, true);
-		if(!tempComment)
-			get_func_cmt(f, false);
+    // Skip tiny functions for speed
+    if (f->size() >= 8)
+    {
+        // Skip if it already has type comment
+        // TODO: Could have option to just skip comment if one already exists?
+        BOOL skip = FALSE;
+        qstring str{};
+        (void)get_func_cmt(&str, f, true);
 
-		if(tempComment)
-		{
-			// Ignore common auto-generated comments
-            if (strncmp(tempComment, "Microsoft VisualC ", SIZESTR("Microsoft VisualC ")) != 0)
+        if (!str.empty())
+        {
+            // Ignore common auto-generated comments
+            if (strncmp(str.c_str(), "Microsoft VisualC ", SIZESTR("Microsoft VisualC ")) != 0)
             {
-                if (strstr(tempComment, "\ndoubtful name") == NULL)
+                if (strstr(str.c_str(), "\ndoubtful name") == NULL)
                     skip = TRUE;
             }
+        }
 
-            //if (skip)
-            //    msg(EAFORMAT" c: \"%s\"\n", f->startEA, tempComment);
-			qfree(tempComment);
-		}
+        // TODO: Add option to append to existing comments?
 
-		// TODO: Add option to append to existing comments?
-
-		if(!skip)
-		{
-			// Iterate function body looking for string references
+        if (!skip)
+        {
+            // Iterate function body looking for string references
             UINT nStr = 0;
             func_item_iterator_t it(f);
 
-		    do
-		    {
-			    // Has an xref?
+            do
+            {
+                // Has an xref?
                 ea_t currentEA = it.current();
-			    xrefblk_t xb;
-			    if(xb.first_from(currentEA, XREF_DATA))
-			    {
-				    // A string (ASCII, Unicode, etc.)?
-				    flags_t flags = get_flags_novalue(xb.to);
-                    if (isASCII(flags))
+                xrefblk_t xb;
+                if (xb.first_from(currentEA, XREF_DATA))
+                {
+                    // A string (ASCII, Unicode, etc.)?
+                   const auto str_type= get_str_type(xb.to);
+                    if (str_type == STRTYPE_C)
                     {
                         // Get the string
-                        char buffer[MAX_LABEL_STR]; buffer[SIZESTR(buffer)] = 0;
-                        int len = get_max_ascii_length(xb.to, ASCSTR_C, ALOPT_IGNHEADS);
+                        qstring buffer{};
+                        int len = get_max_strlit_length(xb.to, str_type, ALOPT_IGNHEADS);
                         if (len > (MIN_STR_SIZE + 1))
                         {
-                            get_ascii_contents2(xb.to, len, ASCSTR_C, buffer, SIZESTR(buffer));
+                            
+                            get_strlit_contents(&buffer, xb.to, len, str_type);
                             if (buffer[0])
                             {
                                 // Clean it up
-                                filterWhitespace(buffer);
+                               // filterWhitespace(buffer);
 
                                 // If it's not tiny continue
-                                if (strlen(buffer) >= MIN_STR_SIZE)
+                                if (buffer.size() >= MIN_STR_SIZE)
                                 {
                                     // If already in the list, just update it's ref count
                                     BOOL skip = FALSE;
                                     for (UINT j = 0; j < nStr; j++)
                                     {
-                                        if (strcmp(aString[j].str, buffer) == 0)
+                                        if (strcmp(aString[j].str, buffer.c_str()) == 0)
                                         {
                                             aString[j].refs++;
                                             skip = TRUE;
@@ -234,7 +226,7 @@ static void processFunction(func_t *f)
                                     if (!skip)
                                     {
                                         // Add it to the list
-                                        strcpy(aString[nStr].str, buffer);
+                                        strcpy(aString[nStr].str, buffer.c_str());
                                         aString[nStr].refs = 1;
                                         ++nStr;
 
@@ -245,29 +237,30 @@ static void processFunction(func_t *f)
                                 }
                             }
                         }
-				    }
-			    }
+                    }
+                }
 
-		    }while(it.next_addr());
+            } while (it.next_addr());
 
-			// Got at least one string?
-            if(nStr)
-			{
-				// Sort by reference count
+            // Got at least one string?
+            if (nStr)
+            {
+                // Sort by reference count
                 if (nStr > 1)
                     qsort(aString, nStr, sizeof(STRC), compare);
 
-				// Concatenate a final comment string
-                char comment[MAX_COMMENT + MAX_LABEL_STR] = { "STR: " };
+                // Concatenate a final comment string
+                char comment[MAX_COMMENT + MAX_LABEL_STR] = {"STR: "};
                 for (UINT i = 0; i < nStr; i++)
                 {
-                    STRC *sc = &aString[i];
+                    STRC* sc = &aString[i];
                     int freeSize = ((MAX_COMMENT - strlen(comment)) - 1);
                     if ((freeSize > 6) && (freeSize < (int)(strlen(sc->str) + 2)))
                         break;
                     else
                     {
-                        char temp[MAX_LABEL_STR]; temp[SIZESTR(temp)] = 0;
+                        char temp[MAX_LABEL_STR];
+                        temp[SIZESTR(temp)] = 0;
                         _snprintf(temp, SIZESTR(temp), "\"%s\"", sc->str);
                         strncat(comment, temp, freeSize);
                     }
@@ -283,12 +276,12 @@ static void processFunction(func_t *f)
                     }
                 }
 
-				// Add/replace comment
-                //msg(EAFORMAT" %u\n", f->startEA, nStr);
-				del_func_cmt(f, true); del_func_cmt(f, false);
-				set_func_cmt(f, comment, true);
-				commentCount++;
-			}
-		}
-	}
+                // Add/replace comment
+                // msg(EAFORMAT" %u\n", f->startEA, nStr);
+                // del_func_cmt(f, true); del_func_cmt(f, false);
+                set_func_cmt(f, comment, true);
+                commentCount++;
+            }
+        }
+    }
 }

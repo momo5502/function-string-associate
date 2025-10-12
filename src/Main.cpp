@@ -7,16 +7,16 @@
 #include "stdafx.h"
 
 // === Function Prototypes ===
-int idaapi IDAP_init();
+plugmod_t * idaapi IDAP_init();
 void idaapi IDAP_term();
-void idaapi IDAP_run(int arg);
+bool idaapi IDAP_run(size_t arg);
 extern void CORE_Init();
 extern void CORE_Process(int iArg);
 extern void CORE_Exit();
 
 
 // === Data ===
-const static char IDAP_name[] = "Function String Associate";
+const static char IDAP_name[] = "Momo's Function String Associate";
 
 // Plug-in description block
 extern "C" ALIGN(32) plugin_t PLUGIN =
@@ -33,7 +33,7 @@ extern "C" ALIGN(32) plugin_t PLUGIN =
 };
 
 // Init
-int idaapi IDAP_init()
+plugmod_t * idaapi IDAP_init()
 {
     CORE_Init();
     return(PLUGIN_OK);
@@ -46,9 +46,10 @@ void idaapi IDAP_term()
 }
 
 // Run
-void idaapi IDAP_run(int iArg)
+bool idaapi IDAP_run(size_t iArg)
 {
     CORE_Process(iArg);
+    return true;
 }
 
 
