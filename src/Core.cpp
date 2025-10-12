@@ -4,7 +4,11 @@
 // Desc: Function String Associate plug-in
 //
 // ****************************************************************************
-#include "stdafx.h"
+#include "plugin.hpp"
+#include "Utility.h"
+
+#define MY_VERSION MAKEWORD(5, 1) // Low, high, 0 to 99
+
 // #include <WaitBoxEx.h>
 
 const UINT MAX_LINE_STR_COUNT = 10;
@@ -42,22 +46,10 @@ static const char mainDialog[] = {
 
     " \n\n\n\n\n"};
 
-// Initialize
-void CORE_Init()
-{
-    // String container should be align 16
-    _ASSERT((sizeof(STRC) & 7) == 0);
-}
-
-// Un-initialize
-void CORE_Exit()
-{
-}
-
 // static void idaapi doHyperlink(TView *fields[], int code) { open_url("http://www.macromonkey.com/bb/"); }
 
 // Plug-in process
-void CORE_Process(int iArg)
+void CORE_Process(size_t iArg)
 {
     try
     {
@@ -193,7 +185,7 @@ static void processFunction(func_t* f)
                 if (xb.first_from(currentEA, XREF_DATA))
                 {
                     // A string (ASCII, Unicode, etc.)?
-                   const auto str_type= get_str_type(xb.to);
+                    const auto str_type = get_str_type(xb.to);
                     if (str_type == STRTYPE_C)
                     {
                         // Get the string
@@ -201,12 +193,11 @@ static void processFunction(func_t* f)
                         int len = get_max_strlit_length(xb.to, str_type, ALOPT_IGNHEADS);
                         if (len > (MIN_STR_SIZE + 1))
                         {
-                            
                             get_strlit_contents(&buffer, xb.to, len, str_type);
                             if (buffer[0])
                             {
                                 // Clean it up
-                               // filterWhitespace(buffer);
+                                // filterWhitespace(buffer);
 
                                 // If it's not tiny continue
                                 if (buffer.size() >= MIN_STR_SIZE)

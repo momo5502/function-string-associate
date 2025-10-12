@@ -5,24 +5,36 @@
 //
 // ****************************************************************************
 #pragma once
+
+#define WIN32_LEAN_AND_MEAN
+#define WINVER       0x0502 // WinXP++
+#define _WIN32_WINNT 0x0502
+#include <windows.h>
+#include <intrin.h>
+#pragma intrinsic(memset, memcpy, strcat, strcmp, strcpy, strlen)
+
 #include <string>
 
 // Size of string with out terminator
-#define SIZESTR(x) (sizeof(x) - 1)
+#define SIZESTR(x)  (sizeof(x) - 1)
 
 // Data and function alignment
-#define ALIGN(_x_) __declspec(align(_x_))
+#define ALIGN(_x_)  __declspec(align(_x_))
 
 // Tick IDA's Qt message pump so it will show msg() output
 #define refreshUI() WaitBox::processIdaEvents()
 
-#define CATCH() catch (...) { msg("** Exception in %s()! ***\n", __FUNCTION__); }
+#define CATCH()                                           \
+    catch (...)                                           \
+    {                                                     \
+        msg("** Exception in %s()! ***\n", __FUNCTION__); \
+    }
 
 // Stack alignment trick, based on Douglas Walker's post
 // http://www.gamasutra.com/view/feature/3975/data_alignment_part_2_objects_on_.php
-#define STACKALIGN(name, type) \
-	BYTE space_##name[sizeof(type) + (16-1)]; \
-	type &name = *reinterpret_cast<type *>((UINT_PTR) (space_##name + (16-1)) & ~(16-1))
+#define STACKALIGN(name, type)                  \
+    BYTE space_##name[sizeof(type) + (16 - 1)]; \
+    type& name = *reinterpret_cast<type*>((UINT_PTR)(space_##name + (16 - 1)) & ~(16 - 1))
 
 // ea_t zero padded hex number format
 #ifndef __EA64__
@@ -39,4 +51,4 @@ typedef double TIMESTAMP;
 
 TIMESTAMP getTimeStamp();
 LPCSTR timeString(TIMESTAMP Time);
-LPSTR  prettyNumberString(UINT64 n, __bcount(32) LPSTR buffer);
+LPSTR prettyNumberString(UINT64 n, __bcount(32) LPSTR buffer);
