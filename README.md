@@ -4,4 +4,5 @@
 
 A fork of the well known IDA Plugin: Function String Associate.
 
-This project makes use of the latest open sourced IDA SDK & CMake.
+This project makes use of the latest open sourced IDA SDK, uses CMake and has GitHub action support.  
+This serves as a template for future plugins.
