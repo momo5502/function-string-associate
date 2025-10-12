@@ -7,7 +7,7 @@ namespace momo
     {
         namespace plugin
         {
-            const char* name = "Function String Associate";
+            constexpr const char* name = "Function String Associate";
 
             plugmod_t* idaapi initialize()
             {
@@ -24,7 +24,7 @@ namespace momo
                 return true;
             }
 
-            plugin_t create()
+            consteval plugin_t create()
             {
                 return {
                     .version = IDP_INTERFACE_VERSION,
